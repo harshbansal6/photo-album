@@ -1,8 +1,41 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Heart, Gift, Sparkles } from 'lucide-react';
+import { Button } from './ui/button';
+import { Heart, Gift, Sparkles, Trash2, AlertTriangle } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
+import AddBirthdayMessage from './AddBirthdayMessage';
+import { messageAPI } from '../services/api';
+import { useToast } from '../hooks/use-toast';
 
-const BirthdayMessages = ({ messages }) => {
+const BirthdayMessages = ({ messages, onMessageAdded, onMessageDeleted }) => {
+  const [deletingMessageId, setDeletingMessageId] = useState(null);
+  const { toast } = useToast();
+
+  const handleDeleteMessage = async (messageId) => {
+    try {
+      setDeletingMessageId(messageId);
+      await messageAPI.deleteMessage(messageId);
+      
+      toast({
+        title: "Message deleted",
+        description: "The birthday message has been removed successfully",
+      });
+
+      // Notify parent component
+      if (onMessageDeleted) {
+        onMessageDeleted(messageId);
+      }
+    } catch (error) {
+      console.error('Failed to delete message:', error);
+      toast({
+        title: "Failed to delete message",
+        description: "Unable to delete the birthday message. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setDeletingMessageId(null);
+    }
+  };
   return (
     <div className="space-y-8">
       <div className="text-center mb-8">
@@ -14,6 +47,9 @@ const BirthdayMessages = ({ messages }) => {
           <Gift className="h-8 w-8 text-rose-500" />
         </div>
         <p className="text-gray-600">Special words for a special day</p>
+        <div className="mt-6">
+          <AddBirthdayMessage onMessageAdded={onMessageAdded} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -28,8 +64,43 @@ const BirthdayMessages = ({ messages }) => {
                   <Sparkles className="h-5 w-5 text-rose-500" />
                   {message.title}
                 </CardTitle>
-                <div className="text-rose-500">
-                  <Heart className="h-6 w-6 fill-current" />
+                <div className="flex items-center gap-2">
+                  <div className="text-rose-500">
+                    <Heart className="h-6 w-6 fill-current" />
+                  </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                        disabled={deletingMessageId === message.id}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="max-w-md">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2">
+                          <AlertTriangle className="h-5 w-5 text-red-500" />
+                          Delete Birthday Message
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete "{message.title}"? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDeleteMessage(message.id)}
+                          className="bg-red-500 hover:bg-red-600 text-white"
+                          disabled={deletingMessageId === message.id}
+                        >
+                          {deletingMessageId === message.id ? 'Deleting...' : 'Delete'}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             </CardHeader>

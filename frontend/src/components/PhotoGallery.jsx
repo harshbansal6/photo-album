@@ -2,12 +2,17 @@ import React, { useState } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { Heart, Calendar, MapPin, MessageCircle } from 'lucide-react';
+import { Heart, Calendar, MapPin, MessageCircle, Trash2, AlertTriangle } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
 import PhotoModal from './PhotoModal';
+import { photoAPI } from '../services/api';
+import { useToast } from '../hooks/use-toast';
 
-const PhotoGallery = ({ photos }) => {
+const PhotoGallery = ({ photos, onPhotoDeleted }) => {
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [favorites, setFavorites] = useState(new Set());
+  const [deletingPhotoId, setDeletingPhotoId] = useState(null);
+  const { toast } = useToast();
 
   const toggleFavorite = (photoId) => {
     const newFavorites = new Set(favorites);
@@ -17,6 +22,32 @@ const PhotoGallery = ({ photos }) => {
       newFavorites.add(photoId);
     }
     setFavorites(newFavorites);
+  };
+
+  const handleDeletePhoto = async (photoId) => {
+    try {
+      setDeletingPhotoId(photoId);
+      await photoAPI.deletePhoto(photoId);
+      
+      toast({
+        title: "Photo deleted",
+        description: "The photo has been removed successfully",
+      });
+
+      // Notify parent component
+      if (onPhotoDeleted) {
+        onPhotoDeleted(photoId);
+      }
+    } catch (error) {
+      console.error('Failed to delete photo:', error);
+      toast({
+        title: "Failed to delete photo",
+        description: "Unable to delete the photo. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingPhotoId(null);
+    }
   };
 
   return (
@@ -37,21 +68,57 @@ const PhotoGallery = ({ photos }) => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`absolute top-3 right-3 hover:bg-white/20 transition-all duration-200 ${
-                    favorites.has(photo.id) ? 'text-rose-500' : 'text-white'
-                  }`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleFavorite(photo.id);
-                  }}
-                >
-                  <Heart 
-                    className={`h-5 w-5 ${favorites.has(photo.id) ? 'fill-current' : ''}`} 
-                  />
-                </Button>
+                <div className="absolute top-3 right-3 flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`hover:bg-white/20 transition-all duration-200 ${
+                      favorites.has(photo.id) ? 'text-rose-500' : 'text-white'
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorite(photo.id);
+                    }}
+                  >
+                    <Heart 
+                      className={`h-5 w-5 ${favorites.has(photo.id) ? 'fill-current' : ''}`} 
+                    />
+                  </Button>
+                  
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="hover:bg-white/20 transition-all duration-200 text-white hover:text-red-400"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2">
+                          <AlertTriangle className="h-5 w-5 text-red-500" />
+                          Delete Photo
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete "{photo.title}"? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDeletePhoto(photo.id)}
+                          disabled={deletingPhotoId === photo.id}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          {deletingPhotoId === photo.id ? 'Deleting...' : 'Delete'}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
 
                 <div className="absolute bottom-0 left-0 right-0 p-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <h3 className="font-semibold text-lg mb-1">{photo.title}</h3>

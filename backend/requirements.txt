@@ -1,5 +1,6 @@
 fastapi==0.110.1
 uvicorn
+gunicorn
 boto3
 requests-oauthlib
 cryptography

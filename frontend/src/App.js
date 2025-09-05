@@ -107,6 +107,21 @@ const Home = () => {
     });
   };
 
+  // Handle birthday message creation success
+  const handleMessageAdded = (newMessage) => {
+    setMessages(prev => [newMessage, ...prev]);
+  };
+
+  // Handle photo deletion
+  const handlePhotoDeleted = (photoId) => {
+    setPhotos(prev => prev.filter(photo => photo.id !== photoId));
+  };
+
+  // Handle message deletion
+  const handleMessageDeleted = (messageId) => {
+    setMessages(prev => prev.filter(message => message.id !== messageId));
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-yellow-50 flex items-center justify-center">
@@ -197,7 +212,7 @@ const Home = () => {
                 </Button>
               </div>
             ) : (
-              <PhotoGallery photos={photos} />
+              <PhotoGallery photos={photos} onPhotoDeleted={handlePhotoDeleted} />
             )}
           </TabsContent>
 
@@ -225,7 +240,7 @@ const Home = () => {
                 <p className="text-gray-600">Loading birthday messages...</p>
               </div>
             ) : (
-              <BirthdayMessages messages={messages} />
+              <BirthdayMessages messages={messages} onMessageAdded={handleMessageAdded} onMessageDeleted={handleMessageDeleted} />
             )}
           </TabsContent>
 
