@@ -3,9 +3,9 @@ from typing import List
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends
 from fastapi.responses import FileResponse
 from motor.motor_asyncio import AsyncIOMotorDatabase
-from .models import Photo, PhotoCreate, PhotoUpdate
-from .file_handler import FileHandler
-from .database import get_database
+from models import Photo, PhotoCreate, PhotoUpdate
+from file_handler import FileHandler
+from database import get_database
 import json
 
 router = APIRouter(prefix="/api", tags=["photos"])
