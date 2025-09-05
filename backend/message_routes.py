@@ -2,8 +2,8 @@ from datetime import datetime
 from typing import List
 from fastapi import APIRouter, HTTPException, Depends
 from motor.motor_asyncio import AsyncIOMotorDatabase
-from .models import BirthdayMessage, BirthdayMessageCreate, BirthdayMessageUpdate
-from .database import get_database
+from models import BirthdayMessage, BirthdayMessageCreate, BirthdayMessageUpdate
+from database import get_database
 
 router = APIRouter(prefix="/api", tags=["messages"])
 
