@@ -211,11 +211,13 @@ const UploadSection = ({ onPhotoUploaded }) => {
               
               <label htmlFor="file-upload">
                 <Button 
-                  className="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white"
-                  type="button"
+                  className="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white cursor-pointer"
+                  asChild
                 >
-                  <Camera className="h-4 w-4 mr-2" />
-                  Choose Photos
+                  <span>
+                    <Camera className="h-4 w-4 mr-2" />
+                    Choose Photos
+                  </span>
                 </Button>
               </label>
             </div>
@@ -228,8 +230,8 @@ const UploadSection = ({ onPhotoUploaded }) => {
 
       {/* Upload Form Dialog */}
       <Dialog open={showUploadForm} onOpenChange={setShowUploadForm}>
-        <DialogContent className="max-w-2xl bg-gradient-to-br from-rose-50 to-pink-50 border-rose-200">
-          <DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto bg-gradient-to-br from-rose-50 to-pink-50 border-rose-200">
+          <DialogHeader className="sticky top-0 bg-gradient-to-br from-rose-50 to-pink-50 z-10 pb-4">
             <DialogTitle className="text-2xl font-bold text-gray-800">Add Photo Details</DialogTitle>
           </DialogHeader>
           
@@ -354,7 +356,7 @@ const UploadSection = ({ onPhotoUploaded }) => {
               </div>
             )}
 
-            <div className="flex gap-3 pt-4">
+            <div className="flex gap-3 pt-4 sticky bottom-0 bg-gradient-to-br from-rose-50 to-pink-50 -mx-6 px-6 pb-6 border-t border-rose-200 mt-6">
               <Button
                 type="button"
                 variant="outline"

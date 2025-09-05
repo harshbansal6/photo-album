@@ -10,7 +10,7 @@ import magic
 
 
 class FileHandler:
-    def __init__(self, base_upload_dir: str = "/app/uploads"):
+    def __init__(self, base_upload_dir: str = "uploads"):
         self.base_upload_dir = Path(base_upload_dir)
         self.photos_dir = self.base_upload_dir / "photos"
         self.ensure_directories()

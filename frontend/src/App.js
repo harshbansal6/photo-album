@@ -22,6 +22,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [photosLoading, setPhotosLoading] = useState(false);
   const [messagesLoading, setMessagesLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("gallery");
   const { toast } = useToast();
 
   // Fetch photos from API
@@ -144,7 +145,7 @@ const Home = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs defaultValue="gallery" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4 mb-8 bg-white/60 border border-rose-200">
             <TabsTrigger 
               value="gallery" 
@@ -189,7 +190,7 @@ const Home = () => {
                 <p className="text-gray-600 mb-4">Start by uploading your first memory!</p>
                 <Button 
                   className="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white"
-                  onClick={() => document.querySelector('[value="upload"]').click()}
+                  onClick={() => setActiveTab("upload")}
                 >
                   <Upload className="h-4 w-4 mr-2" />
                   Upload First Photo
