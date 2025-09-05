@@ -4,9 +4,9 @@ from starlette.middleware.cors import CORSMiddleware
 import os
 import logging
 from pathlib import Path
-from .photo_routes import router as photo_router
-from .message_routes import router as message_router
-from .database import init_database, close_database
+from photo_routes import router as photo_router
+from message_routes import router as message_router
+from database import init_database, close_database
 
 
 ROOT_DIR = Path(__file__).parent
