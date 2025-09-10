@@ -147,3 +147,45 @@ async def get_photo_file(photo_id: str, db: AsyncIOMotorDatabase = Depends(get_d
             "ETag": f'"{photo_obj.id}"'
         }
     )
+
+
+@router.post("/photos/reprocess")
+async def reprocess_all_photos():
+    """Reprocess all existing photos to fix EXIF orientation issues"""
+    try:
+        results = file_handler.reprocess_all_images()
+        return {
+            "message": "Photo reprocessing completed",
+            "results": results
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to reprocess photos: {str(e)}")
+
+
+@router.post("/photos/{photo_id}/reprocess")
+async def reprocess_photo(photo_id: str, db: AsyncIOMotorDatabase = Depends(get_database)):
+    """Reprocess a specific photo to fix EXIF orientation issues"""
+    try:
+        # Get photo details
+        photo = await db.photos.find_one({"id": photo_id})
+        if not photo:
+            raise HTTPException(status_code=404, detail="Photo not found")
+        
+        photo_obj = Photo(**photo)
+        file_path = file_handler.get_file_path(photo_obj.filename, photo_obj.date)
+        
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail="Photo file not found")
+        
+        # Reprocess the image
+        was_processed = file_handler.reprocess_image(file_path)
+        
+        return {
+            "message": "Photo reprocessing completed",
+            "photo_id": photo_id,
+            "was_processed": was_processed,
+            "status": "processed" if was_processed else "no_changes_needed"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to reprocess photo: {str(e)}")
